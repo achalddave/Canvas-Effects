@@ -21,6 +21,13 @@ Circle.prototype.draw = function(ctx, x, y, r, gradArr) {
 
 	// [start|grad]: array of two hex values
 Circle.prototype.pulsate = function(startGrad, endGrad, duration, easing) {
+  if (typeof easing == 'string') {
+    if (easing in this.easingFunctions) {
+      easing = this.easingFunctions[easing];
+    } else {
+      return;
+    }
+  }
   var startTime = +(new Date()),
       sl = hexToRgbArr(startGrad[0]), // start light array
       sd = hexToRgbArr(startGrad[1]), // start dark array
@@ -31,6 +38,7 @@ Circle.prototype.pulsate = function(startGrad, endGrad, duration, easing) {
 
   var self = this;
 
+  // update to use request animation frame
   this.timer = setInterval(function() {
     var diff = +(new Date())-startTime;
     for (var i = 0; i < cl.length; i++) {
@@ -51,19 +59,22 @@ Circle.prototype.pulsate = function(startGrad, endGrad, duration, easing) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
-  // credit http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-  function reqAnim() {
+}
+
+// currently unused
+// credit http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+Circle.prototype.requestAnim = function () {
     return  window.requestAnimationFrame       || 
             window.webkitRequestAnimationFrame || 
             window.mozRequestAnimationFrame    || 
             window.oRequestAnimationFrame      || 
             window.msRequestAnimationFrame 
   }
-}
 
-function sinEase(start, end, time, duration) {
-	var scaler = duration/Math.PI*2,
-			scaledDiff = time/scaler;
-	return start + (end-start)*Math.sin(scaledDiff);
+Circle.prototype.easingFunctions = {
+  sine : function(start, end, time, duration) {
+    var scaler = duration/Math.PI*2,
+        scaledDiff = time/scaler;
+    return start + (end-start)*Math.sin(scaledDiff);
+ }
 }
-
